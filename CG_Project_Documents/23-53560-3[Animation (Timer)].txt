@@ -1,0 +1,162 @@
+#include <windows.h>
+#include <GL/glut.h>
+#include <cmath>
+
+float carPosition = -1.2f;
+float cloudPosition = -1.2f;
+float birdX = -1.0f;
+float birdY = -0.8f;
+
+void initGL()
+{
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+void drawCircle(float x, float y, float radius)
+{
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i <= 100; i++)
+    {
+        float angle = 2.0f * 3.1415926f * i / 100;
+        float dx = radius * cosf(angle);
+        float dy = radius * sinf(angle);
+        glVertex2f(x + dx, y + dy);
+    }
+    glEnd();
+}
+
+void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3)
+{
+    glBegin(GL_TRIANGLES);
+    glVertex2f(x1, y1);
+    glVertex2f(x2, y2);
+    glVertex2f(x3, y3);
+    glEnd();
+}
+
+void road()
+{
+    glColor3f(0.3f, 0.3f, 0.3f);
+    glBegin(GL_QUADS);
+        glVertex2f(-2.1f, -0.7f);
+        glVertex2f(2.1f, -0.7f);
+        glVertex2f(2.1f, -1.0f);
+        glVertex2f(-2.1f, -1.0f);
+    glEnd();
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_QUADS);
+        glVertex2f(-2.1f, -0.8f);
+        glVertex2f(2.1f, -0.8f);
+        glVertex2f(2.1f, -0.78f);
+        glVertex2f(-2.1f, -0.78f);
+    glEnd();
+
+}
+
+void tree(float x, float y)
+{
+    glColor3f(0.55f, 0.27f, 0.07f);
+    glBegin(GL_QUADS);
+        glVertex2f(x - 0.02f, y);
+        glVertex2f(x + 0.02f, y);
+        glVertex2f(x + 0.02f, y + 0.1f);
+        glVertex2f(x - 0.02f, y + 0.1f);
+    glEnd();
+
+    glColor3f(0.0f, 0.6f, 0.0f);
+    drawCircle(x, y + 0.15f, 0.07f);
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glColor3f(0.9f, 0.9f, 1.0f);
+    drawCircle(-0.8f, 0.8f, 0.2f);
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+    drawCircle(cloudPosition - 0.09f, 0.52f, 0.08f);
+    drawCircle(cloudPosition - 0.07f, 0.5f, 0.07f);
+    drawCircle(cloudPosition + 0.09f, 0.52f, 0.07f);
+    drawCircle(cloudPosition - 0.05f, 0.48f, 0.08f);
+    drawCircle(cloudPosition + 0.05f, 0.48f, 0.05f);
+
+
+    drawCircle(cloudPosition - 0.6f, 0.6f, 0.08f);
+    drawCircle(cloudPosition - 0.5f, 0.61f, 0.09f);
+    drawCircle(cloudPosition - 0.4f, 0.6f, 0.08f);
+
+    road();
+
+    tree(-1.2f, -0.7f);
+    tree(-1.2f, -0.7f);
+    tree(0.7f, -0.7f);
+    tree(0.9f, -0.7f);
+
+    float carX = carPosition;
+    float carY = -0.74f;
+
+    glColor3f(1.0f, 0.0f, 0.0f);
+    drawTriangle(carX - 0.2f, carY, carX + 0.2f, carY, carX + 0.2f, carY + 0.1f);
+    drawTriangle(carX - 0.2f, carY, carX - 0.2f, carY + 0.1f, carX + 0.2f, carY + 0.1f);
+    drawTriangle(carX - 0.1f, carY + 0.1f, carX + 0.1f, carY + 0.1f, carX, carY + 0.2f);
+
+    glColor3f(0.0f, 0.9f, 1.0f);
+    drawCircle(carX - 0.12f, carY - 0.02f, 0.05f);
+    drawCircle(carX + 0.12f, carY - 0.02f, 0.05f);
+
+    glutSwapBuffers();
+}
+
+void update(int value)
+{
+    carPosition += 0.01f;
+    if (carPosition > 2.1f)
+    {
+        carPosition = -2.1f;
+    }
+
+    cloudPosition += 0.008f;
+    if (cloudPosition > 2.1f)
+    {
+        cloudPosition = -2.1f;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(16, update, 0);
+}
+
+void reshape(GLsizei width, GLsizei height)
+{
+    if (height == 0) height = 1;
+    GLfloat aspect = (GLfloat)width / (GLfloat)height;
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    if (width >= height)
+    {
+        gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
+    }
+    else
+    {
+        gluOrtho2D(-1.0, 1.0, -1.0 / aspect, 1.0 / aspect);
+    }
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE);
+    glutInitWindowSize(640, 480);
+    glutInitWindowPosition(50, 50);
+    glutCreateWindow("Lab 3-Animation [Timer] by 23-53560-3");
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutTimerFunc(0, update, 0);
+    initGL();
+    glutMainLoop();
+    return 0;
+}
